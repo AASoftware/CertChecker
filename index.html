@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CertChecker</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f8f9fa; /* Ändern Sie die Hintergrundfarbe zu Grau */
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 30px;
+        }
+        .navbar {
+            background-color: #007bff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .navbar-brand {
+            font-size: 24px;
+            font-weight: bold;
+            color: #fff;
+        }
+        .navbar-toggler-icon {
+            background-color: #fff;
+        }
+        .form-inline .btn {
+            margin-left: 10px;
+        }
+        th,
+        td {
+            vertical-align: middle;
+        }
+        .server-actions button {
+            height: 36px;
+            font-size: 14px;
+            padding: 6px 12px;
+        }
+        .alert {
+            padding: 10px 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        .status-ok {
+            background-color: #90ee90;
+        }
+        .status-info {
+            background-color: #add8e6;
+        }
+        .status-critical {
+            background-color: #ffcccb;
+        }
+        .table th,
+        .table td {
+            border: 1px solid #dee2e6;
+            padding: 8px;
+            font-size: 14px;
+        }
+        .table th {
+            background-color: #f8f9fa;
+            border-top: none;
+        }
+        .refresh-btn {
+            display: none;
+        }
+        .table-hover tbody tr:hover {
+            background-color: rgba(0, 0, 0, 0.03);
+        }
+        .table-hover tbody tr:hover .refresh-btn {
+            display: inline-block;
+        }
+        .page-title {
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+        .add-server-btn {
+            margin-left: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            transition: all 0.3s ease-in-out;
+        }
+        .add-server-btn:hover {
+            background-color: #0056b3;
+        }
+        .certchecker {
+            color: #000; /* Ändern Sie die Farbe des Textes zu Schwarz */
+            font-weight: bold;
+            font-size: 24px; /* Ändern Sie die Schriftgröße */
+        }
+        .server-list {
+            color: #000; /* Ändern Sie die Farbe des Textes zu Schwarz */
+            font-weight: bold;
+        }
+        .form-row input {
+            background-color: #fff; /* Ändern Sie die Hintergrundfarbe der Formulareingaben zu Weiß */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="certchecker">CertChecker</h1> <!-- Ändern Sie die Klasse von "page-title" zu "certchecker" -->
+        <nav class="navbar navbar-expand-lg navbar-light">
+            <a class="navbar-brand" href="#">CertChecker</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <!-- Removed Home and About links -->
+                </ul>
+                <form class="form-inline my-2 my-lg-0" id="addServerForm" method="post" action="/add_server">
+                    <div class="form-row">
+                        <div class="col">
+                            <input class="form-control mr-sm-2" type="text" placeholder="Server Name" name="name">
+                        </div>
+                        <div class="col">
+                            <input class="form-control mr-sm-2" type="text" placeholder="Server URL" name="url" id="serverURL">
+                        </div>
+                    </div>
+                    <div class="form-row mt-2">
+                        <div class="col">
+                            <input class="form-control mr-sm-2" type="text" placeholder="Port" name="port" id="serverPort">
+                        </div>
+                        <div class="col">
+                            <input class="form-control mr-sm-2" type="email" placeholder="Email Address" name="email">
+                        </div>
+                        <button class="btn btn-outline-primary my-2 my-sm-0 add-server-btn" type="submit">Add Server</button>
+                    </div>
+                </form>
+            </div>
+        </nav>
+
+        <h2 class="server-list">Server List</h2> <!-- Ändern Sie die Klasse von "page-title" zu "server-list" -->
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Server Name</th>
+                        <th>Server URL</th>
+                        <th>Email Address</th>
+                        <th>Issuer</th>
+                        <th>Expiry Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="serverListBody">
+                    {% for status in ['Critical', 'Info', 'OK'] %}
+                        {% for server in servers %}
+                            {% if server.status == status %}
+                                <tr class="status-{{ server.status|lower }}">
+                                    <td>{{ server.name }}</td>
+                                    <td>{{ server.url }}</td>
+                                    <td>{{ server.email }}</td>
+                                    <td>{{ server.issuer }}</td>
+                                    <td>{{ server.expiry_date }}</td>
+                                    <td>{{ server.status }}</td>
+                                    <td class="server-actions">
+                                        <form action="/remove_server/{{ server.id }}" method="post">
+                                            <button type="submit" class="btn btn-danger">Remove</button>
+                                        </form>
+                                        <button type="button" class="btn btn-outline-primary refresh-btn">Refresh</button>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#addServerForm').submit(function(event) {
+                var serverURL = $('#serverURL').val();
+                var serverPort = $('#serverPort').val();
+                var regex = /^\d{1,5}$/;
+                if (!regex.test(serverPort)) {
+                    alert('Invalid Port format!');
+                    event.preventDefault();
+                    return;
+                }
+                $.get('/check_server?url=' + serverURL, function(data) {
+                    if (data.exists) {
+                        event.preventDefault();
+                        alert('URL already exists!');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
