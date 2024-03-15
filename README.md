@@ -15,12 +15,10 @@ Scheduled Refresh: The application automatically refreshes the server list and c
 Installation
 Clone the repository to your local computer:
 
-bash
 Copy code
 git clone https://github.com/your-username/CertChecker.git
 Navigate to the project directory:
 
-bash
 Copy code
 cd CertChecker
 Install the required dependencies:
