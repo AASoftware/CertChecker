@@ -14,7 +14,7 @@ Features
 
 Installation
 1. Clone the repository to your local computer:
-   git clone https://github.com/your-username/CertChecker.git
+   git clone https://github.com/AASoftware/CertChecker.git
 2. Navigate to the project directory:
    cd CertChecker
 3. Install the required dependencies:
